@@ -6,7 +6,32 @@ const Header = ({ title }) => {
 
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
 
-const Display = ({ value }) => <p>{value}</p>;
+const StatisticLine = ({ text, value }) => (
+  <tr>
+    <td>{text}</td>
+    <td>{value}</td>
+  </tr>
+);
+
+const Statistics = ({ good, neutral, bad }) => {
+  let all = good + neutral + bad;
+  let average = all === 0 ? 0 : (good - bad) / all;
+  let positive = all === 0 ? 0 : good / all;
+  return (
+    <div>
+      <table>
+        <tbody>
+          <StatisticLine text={"good"} value={good} />
+          <StatisticLine text={"neutral"} value={neutral} />
+          <StatisticLine text={"bad"} value={bad} />
+          <StatisticLine text={"all"} value={all} />
+          <StatisticLine text={"average"} value={average} />
+          <StatisticLine text={"positive"} value={`${positive} %`} />
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const App = () => {
   const firstTitle = "give feedback";
@@ -35,9 +60,7 @@ const App = () => {
       <Button onClick={handleNeutralFeedBack} text={"neutral"} />
       <Button onClick={handleBadFeedBack} text={"bad"} />
       <Header title={secondTitle} />
-      <Display value={good} />
-      <Display value={neutral} />
-      <Display value={bad} />
+      <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   );
 };
