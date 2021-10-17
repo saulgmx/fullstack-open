@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import personService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -12,8 +12,8 @@ const App = () => {
   const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    personService.getAll().then((data) => {
+      setPersons(data);
     });
   }, []);
 
@@ -38,13 +38,40 @@ const App = () => {
     let isDuplicateName = persons.some((x) => x.name === newName);
     if (!isDuplicateName) {
       let newId = persons.length + 1;
-      setPersons(
-        persons.concat({ name: newName, number: newNumber, id: newId })
-      );
+      const personObject = { name: newName, number: newNumber, id: newId };
+      personService.create(personObject).then((newPerson) => {
+        setPersons(persons.concat(newPerson));
+      });
     } else {
-      alert(`${newName} is already added to the phonebook`);
+      var result = window.confirm(
+        `${newName} is already added to the phonebook, replace the older number with a new one?`
+      );
+      if (result) {
+        const person = persons.find((p) => p.name === newName);
+        const changedPerson = { ...person, number: newNumber };
+        personService
+          .update(person.id, changedPerson)
+          .then((returnedPerson) => {
+            setPersons(
+              persons.map((p) => (p.id !== person.id ? p : returnedPerson))
+            );
+          });
+      }
     }
   }
+
+  function deletePerson(person) {
+    const result = window.confirm(`Delete ${person.name}?`);
+    if (result) {
+      personService.remove(person.id);
+      setPersons(persons.filter((x) => x.id !== person.id));
+    }
+  }
+
+  let filteredPersons = persons.filter(
+    (p) =>
+      !searchValue || p.name.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <div>
@@ -59,7 +86,7 @@ const App = () => {
         onChangeNumber={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} searchValue={searchValue} />
+      <Persons persons={filteredPersons} onDelete={deletePerson} />
     </div>
   );
 };

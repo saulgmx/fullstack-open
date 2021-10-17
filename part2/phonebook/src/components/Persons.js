@@ -1,15 +1,21 @@
 import React from "react";
 
-const Persons = ({ persons, searchValue }) => {
-  let filteredPersons = persons.filter(
-    (p) =>
-      !searchValue || p.name.toLowerCase().includes(searchValue.toLowerCase())
-  );
-
+const Persons = ({ persons, onDelete }) => {
   return (
     <div>
-      {filteredPersons.map((x) => (
-        <p key={x.id}>{`${x.name} ${x.number}`}</p>
+      {persons.map((x) => (
+        <p key={x.id}>
+          {`${x.name} ${x.number}`}
+          <span>
+            <button
+              onClick={() => {
+                onDelete(x);
+              }}
+            >
+              delete
+            </button>
+          </span>
+        </p>
       ))}
     </div>
   );
